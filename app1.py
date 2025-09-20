@@ -92,10 +92,9 @@ with tab3:
             placeholder.empty()
             st.session_state.results_revealed = True
 
-        # Only count actual candidate votes (exclude 기권) for majority
+        # Count all votes including abstentions for majority calculation (과반수에는 기권 포함)
         candidate_votes = {k: v for k, v in st.session_state.votes.items()}
-        total_candidate_votes = sum(candidate_votes.values())
-        majority_needed = total_candidate_votes / 2
+        majority_needed = st.session_state.total_voters / 2
 
         max_votes = max(candidate_votes.values()) if candidate_votes else 0
         winners = [name for name, count in candidate_votes.items() if count == max_votes]
