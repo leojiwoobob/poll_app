@@ -44,10 +44,6 @@ with tab1:
             st.session_state.abstain_count = 0
             st.success("✅ 투표 설정이 저장되었습니다!")
 
-    if st.button("🔄 새 투표 시작"):
-        reset_poll()
-        st.experimental_rerun()
-
 # ---------------- Page 2: Voting ----------------
 with tab2:
     if not st.session_state.candidate_list:
