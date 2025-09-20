@@ -11,8 +11,7 @@ st.divider()
 for key, default in {
     "votes": {}, "candidate_list": [],
     "total_voters": 0, "voter_count": 0,
-    "abstain_count": 0, "results_revealed": False,
-    "audit_log": []
+    "abstain_count": 0, "results_revealed": False
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -25,7 +24,6 @@ def reset_poll():
     st.session_state.voter_count = 0
     st.session_state.abstain_count = 0
     st.session_state.results_revealed = False
-    st.session_state.audit_log = []
 
 # ---------------- Tabs ----------------
 tab1, tab2, tab3 = st.tabs(["⚙️ 설정", "🗳️ 투표", "📊 결과"])
@@ -44,7 +42,6 @@ with tab1:
             st.session_state.total_voters = total_voters_input
             st.session_state.voter_count = 0
             st.session_state.abstain_count = 0
-            st.session_state.audit_log = []
             st.success("✅ 투표 설정이 저장되었습니다!")
 
     if st.button("🔄 새 투표 시작"):
@@ -63,10 +60,8 @@ with tab2:
         if st.button("투표하기"):
             if choice == "기권":
                 st.session_state.abstain_count += 1
-                st.session_state.audit_log.append("기권")
             else:
                 st.session_state.votes[choice] += 1
-                st.session_state.audit_log.append(choice)
 
             st.session_state.voter_count += 1
             st.success(f"투표 완료! ({st.session_state.voter_count}/{st.session_state.total_voters})")
@@ -92,14 +87,14 @@ with tab3:
             placeholder.empty()
             st.session_state.results_revealed = True
 
-        # Count all votes including abstentions for majority calculation (과반수에는 기권 포함)
+        # Count all votes including abstentions for majority calculation
         candidate_votes = {k: v for k, v in st.session_state.votes.items()}
         majority_needed = st.session_state.total_voters / 2
 
         max_votes = max(candidate_votes.values()) if candidate_votes else 0
         winners = [name for name, count in candidate_votes.items() if count == max_votes]
 
-        # Correct results logic
+        # Results logic
         if len(winners) > 1:
             st.warning("⚠️ 무승부! 동점 후보로 재투표 필요")
             st.snow()
@@ -119,7 +114,6 @@ with tab3:
         st.subheader("📊 투표 결과 (막대 그래프)")
         st.bar_chart(df.set_index("후보자"))
 
-        # Raw results
         st.subheader("📜 투표 요약")
         for name, count in candidate_votes.items():
             st.write(f"✅ {name}: {count}표")
@@ -127,10 +121,6 @@ with tab3:
 
         turnout = (st.session_state.voter_count / st.session_state.total_voters) * 100
         st.info(f"📈 투표율: {turnout:.1f}%")
-
-        # Audit log
-        st.subheader("📝 투표 기록 (익명)")
-        st.write(pd.DataFrame(st.session_state.audit_log, columns=["투표"]))
 
         # Export CSV
         if st.download_button(
